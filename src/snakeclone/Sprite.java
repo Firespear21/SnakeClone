@@ -10,6 +10,8 @@ import java.awt.Image;
 /**
  *
  * @author Manning
+ * 
+ * A class for getting and storing information about an image
  */
 public class Sprite {
 	private Image image;

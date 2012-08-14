@@ -24,9 +24,9 @@ public class EntityManagement {
 		aliveEntities = new ArrayList();
 		deadEntities = new ArrayList();
 	}
-	
-	public EntityManagement get() {
-		return entities;
+
+	public EntityManagement get(){
+	    return entities;
 	}
 	
 	public void addLivingEntity(Entity e){

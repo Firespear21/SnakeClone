@@ -12,9 +12,11 @@ import snakeclone.SnakeClone;
  * @author Manning
  */
 public class SnakeEntity extends Entity {
-
+	//this snakes tail
 	protected ArrayList snakeTail;
+	//the game for this entity
 	private SnakeClone game;
+	//the previous cordinates
 	private long lastX;
 	private long lastY;
 
@@ -32,15 +34,20 @@ public class SnakeEntity extends Entity {
 		lastY = y;
 		super.move(delta);
 	}
+	
+	
 	@Override
 	public void collidedWith(Entity other) {
-		if (other instanceof FoodEntity) {
+		//if collides with food add new tail segments
+	        if (other instanceof FoodEntity) {
+			for(int i=0; i < 6; i++){
 			SnakeTailEntity tailSeg = new SnakeTailEntity("snakeclone/Res/BlueSnakeBody.gif", this);
 			entities.addLivingEntity(tailSeg);
 			snakeTail.add(tailSeg);
+			}
 		}
+		//if collides with dail end the game
 		if (other instanceof SnakeTailEntity) {
-			entities.addDeadEntity(this);
 			game.loose();
 		}
 	}
@@ -61,6 +68,7 @@ public class SnakeEntity extends Entity {
 		this.lastY = lastY;
 	}
 
+	//returns the snake tail
 	public ArrayList getSnakeTail() {
 		return snakeTail;
 	}

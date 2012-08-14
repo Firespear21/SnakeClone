@@ -14,7 +14,6 @@ import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import snakeclone.entity.EnemySnakeEntity;
 import snakeclone.entity.Entity;
 import snakeclone.entity.FoodEntity;
 import snakeclone.entity.SnakeEntity;
@@ -26,18 +25,28 @@ import snakeclone.entity.SnakeEntity;
 public class SnakeClone extends Canvas {
 	//Rendering variables
 	private BufferStrategy strategy;
+	//Stores wether game is running
 	private boolean gameIsRunning = true;
+	//Stores wether game is paused
 	private boolean paused = false;
-	private SnakeEntity ownSnake;
-	private EnemySnakeEntity enemySnake;
+	//Stores the players snake
+	private SnakeEntity snake;
+	//Stores the games entity managment
 	private EntityManagement entities;
+	//Stores and init. the games keyboard input handler
 	private KeyBoardHandler keyBoard = new KeyBoardHandler().get();
+	/* 
+	 * Stores how many food there are left
+	 * this allow for the traking of more than one food
+	 */
 	public int foodLeft = 0;
+	//Stores what should be displayed during a paused game
 	private String message = "";
 	//Object for entities to reside in
 	
 	public SnakeClone() {
-
+	    
+		//Sets up the window for the game and adds keyboard listener
 		JFrame container = new JFrame("Snake Wars");
 
 		JPanel panel = (JPanel) container.getContentPane();
@@ -59,41 +68,60 @@ public class SnakeClone extends Canvas {
 				System.exit(0);
 			}
 		});
-
+		
+		//Focuses the window to get keyboard inputs
 		setFocusable(true);
 		requestFocus();
 		addKeyListener(keyBoard);
 
+		//Creates the buffer
 		createBufferStrategy(2);
 		strategy = getBufferStrategy();
 		
-		entities = new EntityManagement().get();
-		initEntities();
+		//Sets up the entities
+		entities = new EntityManagement();
+		
+		//Starts the game
+		gameStart();
 	}
 	
 	
-	public final void initEntities() {
+	public final void gameStart() {
+		//kill any entities from previous games
+		for(int i=0; i < entities.getEntitySize(); i++){
+			Entity entity = entities.getEntity(i);
+			entities.addDeadEntity(entity);
+		}
+		entities.destroyDeadEntities();
+		
+		//Adds new snake
 		System.out.println("Starting Entity Init");
-		ownSnake = new SnakeEntity(this, "snakeclone/Res/BlueSnake.gif", 400, 300);
-		entities.addLivingEntity(ownSnake);
+		snake = new SnakeEntity(this, "snakeclone/Res/BlueSnake.gif", 400, 300);
+		entities.addLivingEntity(snake);
+		
+		//resets food count
 		foodLeft = 0;
 	}
 	
 	public final void loose() {
+	    //pauses and displays you loose message
 		paused = true;
 		message = "You loose. Try Again? Press N";
-		ArrayList snakeTail = ownSnake.getSnakeTail();
-		for(int i=0; snakeTail.size() > 0;){
-			entities.addDeadEntity((Entity) snakeTail.get(i));
-			snakeTail.remove(i);
-		}
+		
 	}
 	
 	public final void pause() {
+	    //pauses the game untip p is pressed
 		message = "Paused. Press P";
+		if(paused)
+		    paused = false;
+		else
+		    paused = true;
+		keyBoard.setpPressed(false);
 	}
 	
 	public void gameLoop() {
+	    //starts the timer
 		long lastLoopTime = System.currentTimeMillis();
 		System.out.println("Starting game looop");
 		//gameloop
@@ -101,15 +129,11 @@ public class SnakeClone extends Canvas {
 			//work out how long its been since the last update
 			long delta = System.currentTimeMillis() - lastLoopTime;
 			lastLoopTime = System.currentTimeMillis();
+			
 			//clear and draw
 			Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
 			g.setColor(Color.black);
 			g.fillRect(0,0,800,600);
-			
-			if (paused) {
-				g.setColor(Color.WHITE);
-				g.drawString(message, 300, 300);
-			}
 			
 			//Entity Collision BruteForce
 			for (int p=0;p<entities.getEntitySize();p++) {
@@ -129,7 +153,7 @@ public class SnakeClone extends Canvas {
 			
 			//Makes sure snake is in bounds and destroys it if it isn't and
 			//displays the loose message
-			if (ownSnake.checkPostion()){
+			if (snake.checkPostion()){
 				this.loose();
 			}
 			
@@ -138,20 +162,28 @@ public class SnakeClone extends Canvas {
 				FoodEntity food = new FoodEntity(this, "snakeclone/Res/Food.gif");
 				foodLeft++;
 				entities.addLivingEntity(food);
-				System.out.println("Food Created");
 			}
 			
 			//poll the controls
 			if(keyBoard.isLeftPressed()) {
-				ownSnake.turnLeft();
-				System.out.println("Turning left");
+				snake.turnLeft();
 				keyBoard.setLeftPressed(false);
 			}
 			if(keyBoard.isRightPressed()) {
-				ownSnake.turnRight();
-				System.out.println("Turning Right");
+				snake.turnRight();
 				keyBoard.setRightPressed(false);
 			}
+			
+			//starts new game
+			if(keyBoard.isnPressed()) {
+				loose();
+				gameStart();
+				paused = false;
+				keyBoard.setnPressed(false);
+			}
+			//pauses the game
+			if(keyBoard.ispPressed())
+				pause();
 			
 			//Move and draw the entities
 			if (!paused) {
@@ -164,6 +196,11 @@ public class SnakeClone extends Canvas {
 			for (int i=0;i<entities.getEntitySize();i++) {
 				Entity entity = entities.getEntity(i);
 				entity.draw(g);
+			}
+			//If paused draws the message
+			if (paused) {
+				g.setColor(Color.WHITE);
+				g.drawString(message, 300, 300);
 			}
 			
 			//destroy object and flip buffer

@@ -12,12 +12,15 @@ import snakeclone.EntityManagement;
  * @author Manning
  */
 public class SnakeTailEntity extends Entity {
+	//the snake that owns this tail
 	private final SnakeEntity owner;
+	//its previous position
 	private long lastX;
 	private long lastY;
 
+	//creates the tail
 	public SnakeTailEntity(String ref, SnakeEntity owner) {
-		super(ref, 2 ,2);
+		super(ref, -50 ,-50);
 		this.owner = owner;
 	}
 	
@@ -45,6 +48,7 @@ public class SnakeTailEntity extends Entity {
 		}
 	}
 	
+	//does nothing if collition occurs
 	public void collidedWith(Entity other) {
 	}
 

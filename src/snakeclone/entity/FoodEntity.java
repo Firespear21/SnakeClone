@@ -29,6 +29,8 @@ public class FoodEntity extends Entity{
 
 	@Override
 	public void collidedWith(Entity other) {
+	    //if it collides with a snake head then remove itself otherwise
+	    //do nothing
 		if (other instanceof SnakeEntity){
 			entities.addDeadEntity(this);
 			game.foodLeft--;
