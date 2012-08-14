@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 package snakeclone;
-
+//
 import java.util.ArrayList;
 import snakeclone.entity.Entity;
 import snakeclone.entity.SnakeEntity;
